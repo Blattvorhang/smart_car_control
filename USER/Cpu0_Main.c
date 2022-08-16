@@ -44,6 +44,7 @@ USB_STRUCT usbStr;
 volatile float speed = 0;
 volatile short angle = 0; // positive for right, negative for left
 volatile short dir_go_around = 0;
+volatile short dir_busyarea = 0;
 uint8 uart_buff;
 
 /**
