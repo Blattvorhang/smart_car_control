@@ -15,12 +15,17 @@
 #define START_DIRECTLY 0
 #define FREEZONE_EN 1
 #define GO_AROUND 0
+#define BUSYAREA_EN 1
+#define THROUGH_BUSYAREA 0
 
 /* data sent by uart */
 extern volatile float speed;
 extern volatile short angle;
 #if FREEZONE_EN
 extern volatile short dir_go_around; // 1 for right, -1 for left, 0 for none.
+#endif
+#if BUSYAREA_EN
+extern volatile short dir_busyarea; // 1 for right, -1 for left, 0 for none.
 #endif
 
 /* velocity sample */
@@ -154,6 +159,40 @@ void shift(short dir)
     turn_servo_motor(0);
 }
 
+/**
+ * through the busy area.
+ *
+ * @param dir the direction of the turn. 1 for right, -1 for left.
+ */
+void through_busyarea(short dir)
+{
+    const short busyarea_angle = 30;
+    const uint32 motor_pwm_turn = 1500;
+    const float n_prepare = 7.0, n_straight = 4.2, n_turn = 1.8;
+
+    pwm_duty(MOTOR_PWM, motor_pwm_turn);
+
+    run_dist(n_prepare);
+
+    turn_servo_motor(-dir * busyarea_angle);
+    run_dist(n_turn);
+
+    turn_servo_motor(0);
+    run_dist(n_straight);
+
+    turn_servo_motor(dir * busyarea_angle);
+    run_dist(n_turn);
+
+    turn_servo_motor(0);
+    run_dist(n_straight * 0.5);
+
+    turn_servo_motor(dir * busyarea_angle);
+    run_dist(n_turn * 1.2);
+
+    turn_servo_motor(-dir * busyarea_angle);
+    run_dist(n_turn * 0.8);
+}
+
 void core1_main(void)
 {
     IfxScuWdt_disableCpuWatchdog(IfxScuWdt_getCpuWatchdogPassword());
@@ -185,6 +224,9 @@ void core1_main(void)
 #if GO_AROUND
     go_around(-1);
 #endif
+#if THROUGH_BUSYAREA
+    through_busyarea(-1);
+#endif
 
     while (1)
     {
@@ -205,6 +247,13 @@ void core1_main(void)
         {
             go_around(dir_go_around);
             dir_go_around = 0;
+        }
+#endif
+#if BUSYAREA_EN
+        if (dir_busyarea)
+        {
+            go_around(dir_busyarea);
+            dir_busyarea = 0;
         }
 #endif
 #if DEBUG

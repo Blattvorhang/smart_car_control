@@ -122,10 +122,15 @@ void uart_receiveVerify(unsigned char data)
                     UnionBit16.U16_Buff[1] = BuffData[5];
                     angle = UnionBit16.I16; //舵机方向
                     break;
-                case 0x02:
+                case 0x02: //free zone
                     UnionBit16.U16_Buff[0] = BuffData[4];
                     UnionBit16.U16_Buff[1] = BuffData[5];
                     dir_go_around = UnionBit16.I16; //舵机方向
+                    break;
+                case 0x03: //busy area
+                    UnionBit16.U16_Buff[0] = BuffData[4];
+                    UnionBit16.U16_Buff[1] = BuffData[5];
+                    dir_busyarea = UnionBit16.I16; //舵机方向
                     break;
                 }
             }
