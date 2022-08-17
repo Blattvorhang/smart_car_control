@@ -11,7 +11,7 @@
 
 /* mode */
 #define DEBUG 0
-#define START 1
+#define START 0
 #define START_DIRECTLY 0
 #define FREEZONE_EN 1
 #define GO_AROUND 0
@@ -35,7 +35,7 @@ int16 speed_value;
 #define SAMPLING_INTERVAL 10 // ms, MUST NOT CHANGE!!!
 #define SPEED2POWER(v) (1500 * v)
 #define PERIMETER 9200
-#define OFFSET 11 // negative as right, positive as left
+#define OFFSET 6 // negative as right, positive as left
 
 /**
  * It takes an angle as an argument, and turns the servo motor to that angle
@@ -96,7 +96,7 @@ void start_car(void)
 {
     /* parameters */
     const float n_go_straight = 1.4;
-    const float n_turn = 4.3;
+    const float n_turn = 4.0;
     const uint32 motor_pwm_straight = 2700;
     const uint32 motor_pwm_turn = 2000;
     const short turn_angle = 25;
@@ -139,25 +139,6 @@ void go_around(short dir)
     turn_servo_motor(0);
 }
 
-/**
- * shift the car vertical to the path.
- * 
- * @param dir the direction of the shift. 1 for right, -1 for left.
- */
-void shift(short dir)
-{
-    const short go_around_angle = 30;
-    const uint32 motor_pwm_turn = 1800;
-    const float n_go_around = 2.0;
-    pwm_duty(MOTOR_PWM, motor_pwm_turn);
-    turn_servo_motor(-dir * go_around_angle);
-    run_dist(n_go_around);
-    turn_servo_motor(0);
-    run_dist(n_go_around);
-    turn_servo_motor(dir * go_around_angle);
-    run_dist(n_go_around);
-    turn_servo_motor(0);
-}
 
 /**
  * through the busy area.

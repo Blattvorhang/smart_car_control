@@ -48,24 +48,6 @@ volatile short dir_busyarea = 0;
 uint8 uart_buff;
 
 /**
- * It takes a buffer of samples, averages them, and returns the average
- * 
- * @param buffer the buffer to filter
- * 
- * @return The average of the buffer.
- */
-short filter(short * buffer)
-{
-    short sum = 0;
-    for (int i = 0; i < BUF_LEN; ++i)
-        sum += buffer[i];
-    short avg = sum / BUF_LEN;
-    //for (int i = 0; i < BUF_LEN; ++i)
-    //    buffer[i] = avg;
-    return avg;
-}
-
-/**
  * If the received data is the frame head, then set the flag of receiving start to 1, and store the
  * data in the buffer. If the receiving start flag is 1 and the index of the buffer is less than the
  * length of the frame, then store the data in the buffer. If the index of the buffer is greater than
