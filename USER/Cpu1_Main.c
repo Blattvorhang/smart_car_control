@@ -125,17 +125,25 @@ void start_car(void)
  */
 void go_around(short dir)
 {
-    const short go_around_angle = 20;
+    const short go_around_angle = 15;
     const uint32 motor_pwm_turn = 1800;
     const float n_go_around = 2.2;
+    const float alpha_left = 1.6, alpha_right = 0.9;
+    const float alpha = dir > 0 ? alpha_right : alpha_left;
+
     pwm_duty(MOTOR_PWM, motor_pwm_turn);
+
     turn_servo_motor(-dir * go_around_angle);
     run_dist(n_go_around);
+
     turn_servo_motor(dir * go_around_angle);
     run_dist(n_go_around);
-    run_dist(n_go_around);
+
+    run_dist(n_go_around * alpha);
+
     turn_servo_motor(-dir * go_around_angle);
     run_dist(n_go_around);
+
     turn_servo_motor(0);
 }
 
