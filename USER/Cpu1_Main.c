@@ -11,7 +11,7 @@
 
 /* mode */
 #define DEBUG 0
-#define START 0
+#define START 1
 #define START_DIRECTLY 0
 #define FREEZONE_EN 1
 #define GO_AROUND 0
@@ -128,7 +128,7 @@ void go_around(short dir)
     const short go_around_angle = 15;
     const uint32 motor_pwm_turn = 1800;
     const float n_go_around = 2.2;
-    const float alpha_left = 1.6, alpha_right = 0.9;
+    const float alpha_left = 1.6, alpha_right = 1.1;
     const float alpha = dir > 0 ? alpha_right : alpha_left;
 
     pwm_duty(MOTOR_PWM, motor_pwm_turn);
