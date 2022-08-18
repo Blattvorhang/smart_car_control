@@ -17,6 +17,7 @@
 #define GO_AROUND 0
 #define BUSYAREA_EN 1
 #define THROUGH_BUSYAREA 0
+#define OBSTACLE_ACCELERATION 0
 
 /* data sent by uart */
 extern volatile float speed;
@@ -35,7 +36,7 @@ int16 speed_value;
 #define SAMPLING_INTERVAL 10 // ms, MUST NOT CHANGE!!!
 #define SPEED2POWER(v) (1500 * v)
 #define PERIMETER 9200
-#define OFFSET 11 // negative as right, positive as left
+#define OFFSET 6 // negative as right, positive as left
 
 /**
  * It takes an angle as an argument, and turns the servo motor to that angle
@@ -96,10 +97,10 @@ void start_car(void)
 {
     /* parameters */
     const float n_go_straight = 1.4;
-    const float n_turn = 4.3;
+    const float n_turn = 1.5;
     const uint32 motor_pwm_straight = 2700;
-    const uint32 motor_pwm_turn = 2000;
-    const short turn_angle = 25;
+    const uint32 motor_pwm_turn = 1500;
+    const short turn_angle = 40; // positive for left
 
     /* actions */
     gpio_set(MOTOR_DIR, 0);
@@ -147,25 +148,6 @@ void go_around(short dir)
     turn_servo_motor(0);
 }
 
-/**
- * shift the car vertical to the path.
- * 
- * @param dir the direction of the shift. 1 for right, -1 for left.
- */
-void shift(short dir)
-{
-    const short go_around_angle = 30;
-    const uint32 motor_pwm_turn = 1800;
-    const float n_go_around = 2.0;
-    pwm_duty(MOTOR_PWM, motor_pwm_turn);
-    turn_servo_motor(-dir * go_around_angle);
-    run_dist(n_go_around);
-    turn_servo_motor(0);
-    run_dist(n_go_around);
-    turn_servo_motor(dir * go_around_angle);
-    run_dist(n_go_around);
-    turn_servo_motor(0);
-}
 
 /**
  * through the busy area.
@@ -199,6 +181,13 @@ void through_busyarea(short dir)
 
     turn_servo_motor(-dir * busyarea_angle);
     run_dist(n_turn * 0.8);
+}
+
+void accelerate(void)
+{
+    const uint32 motor_pwm_acce = 4000;
+    pwm_duty(MOTOR_PWM, motor_pwm_acce);
+    run_dist(0.5);
 }
 
 void core1_main(void)
@@ -279,6 +268,12 @@ void core1_main(void)
          */
         speed_value = gpt12_get(GPT12_T2);
         gpt12_clear(GPT12_T2);
+#if OBSTACLE_ACCELERATION
+        if (fabs(speed_value) < 1e-6 && speed > 0.5)
+        {
+            accelerate();
+        }
+#endif
         turn_servo_motor(-angle);
         set_motor_speed(speed);
         systick_delay_ms(STM0, SAMPLING_INTERVAL);

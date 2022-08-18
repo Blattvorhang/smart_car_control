@@ -1,8 +1,9 @@
 # all ignore #
-**/*
-**/*.*
+*
+!*/
 
 # white list #
-!USER/
-!CODE/
+!USER/**
+!CODE/**
 !README.md
+!.gitignore
