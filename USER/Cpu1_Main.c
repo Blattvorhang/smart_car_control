@@ -11,12 +11,13 @@
 
 /* mode */
 #define DEBUG 0
-#define START 0
+#define START 1
 #define START_DIRECTLY 0
 #define FREEZONE_EN 1
 #define GO_AROUND 0
 #define BUSYAREA_EN 1
 #define THROUGH_BUSYAREA 0
+#define OBSTACLE_ACCELERATION 0
 
 /* data sent by uart */
 extern volatile float speed;
@@ -96,10 +97,10 @@ void start_car(void)
 {
     /* parameters */
     const float n_go_straight = 1.4;
-    const float n_turn = 4.0;
+    const float n_turn = 1.5;
     const uint32 motor_pwm_straight = 2700;
-    const uint32 motor_pwm_turn = 2000;
-    const short turn_angle = 25;
+    const uint32 motor_pwm_turn = 1500;
+    const short turn_angle = 40; // positive for left
 
     /* actions */
     gpio_set(MOTOR_DIR, 0);
@@ -182,6 +183,13 @@ void through_busyarea(short dir)
     run_dist(n_turn * 0.8);
 }
 
+void accelerate(void)
+{
+    const uint32 motor_pwm_acce = 4000;
+    pwm_duty(MOTOR_PWM, motor_pwm_acce);
+    run_dist(0.5);
+}
+
 void core1_main(void)
 {
     IfxScuWdt_disableCpuWatchdog(IfxScuWdt_getCpuWatchdogPassword());
@@ -260,6 +268,12 @@ void core1_main(void)
          */
         speed_value = gpt12_get(GPT12_T2);
         gpt12_clear(GPT12_T2);
+#if OBSTACLE_ACCELERATION
+        if (fabs(speed_value) < 1e-6 && speed > 0.5)
+        {
+            accelerate();
+        }
+#endif
         turn_servo_motor(-angle);
         set_motor_speed(speed);
         systick_delay_ms(STM0, SAMPLING_INTERVAL);
