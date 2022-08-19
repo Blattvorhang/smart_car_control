@@ -98,8 +98,8 @@ void start_car(void)
     /* parameters */
     const float n_go_straight = 1.4;
     const float n_turn = 1.5;
-    const uint32 motor_pwm_straight = 2700;
-    const uint32 motor_pwm_turn = 1500;
+    const uint32 motor_pwm_straight = 2800;
+    const uint32 motor_pwm_turn = 1700;
     const short turn_angle = 40; // positive for left
 
     /* actions */
@@ -129,7 +129,7 @@ void go_around(short dir)
     const short go_around_angle = 15;
     const uint32 motor_pwm_turn = 1800;
     const float n_go_around = 2.2;
-    const float alpha_left = 1.6, alpha_right = 0.9;
+    const float alpha_left = 1.6, alpha_right = 1.1;
     const float alpha = dir > 0 ? alpha_right : alpha_left;
 
     pwm_duty(MOTOR_PWM, motor_pwm_turn);
