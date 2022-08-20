@@ -46,6 +46,7 @@ volatile short angle = 0; // positive for right, negative for left
 volatile short dir_go_around = 0;
 volatile short dir_busyarea = 0;
 volatile short dir_start = 0;
+volatile short flag_slope = 0;
 uint8 uart_buff;
 
 /**
@@ -119,6 +120,9 @@ void uart_receiveVerify(unsigned char data)
                     UnionBit16.U16_Buff[0] = BuffData[4];
                     UnionBit16.U16_Buff[1] = BuffData[5];
                     dir_busyarea = UnionBit16.I16; //¶æ»ú·½Ïò
+                    break;
+                case 0x04: //slope area
+                    flag_slope = !flag_slope;
                     break;
                 }
             }

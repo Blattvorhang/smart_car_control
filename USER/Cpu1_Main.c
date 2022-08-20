@@ -18,7 +18,7 @@
 #define BUSYAREA_EN 1
 #define THROUGH_BUSYAREA 0
 #define OBSTACLE_ACCELERATION 0
-#define SPEED_PD_CTRL 0
+#define SLOPE_EN 1
 
 /* data sent by uart */
 extern volatile float speed;
@@ -31,6 +31,9 @@ extern volatile short dir_go_around; // 1 for right, -1 for left, 0 for none.
 #endif
 #if BUSYAREA_EN
 extern volatile short dir_busyarea; // 1 for right, -1 for left, 0 for none.
+#endif
+#if SLOPE_EN
+extern volatile short flag_slope; // 1 for right, -1 for left, 0 for none.
 #endif
 
 /* velocity sample */
@@ -77,17 +80,26 @@ void set_motor_speed(float speed)
     }
 }
 
+/**
+ * The function takes in the expected value and the actual value, and returns the output of the PID
+ * controller.
+ * 
+ * @param expectation the expected value
+ * @param reality the current speed of the motor
+ * 
+ * @return The output of the PID controller.
+ */
 int32 pid_ctrl_speed(float expectation, float reality)
 {
     const float kp = 0.1;
     const float kd = 0.01;
     const float ki = 0.0;
-    static float error_last = 0.0;
-    static float error_sum = 0.0;
+    static float error_last1 = 0.0;
+    static float error_last2 = 0.0;
     float error = reality - expectation;
-    float output = -(kp * error + kd * (error - error_last) + ki * error_sum);
-    error_last = error;
-    error_sum += error;
+    float output = -(kp * (error - error_last1) + ki * error + kd * (error - 2 * error_last1 + error_last2));
+    error_last2 = error_last1;
+    error_last1 = error;
     return (int32)output;
 }
 
@@ -277,6 +289,12 @@ void core1_main(void)
              flag = 0;
          else if (angle < -SERVO_MOTOR_MAX_ANGLE)
              flag = 1;*/
+#endif
+#if SLOPE_EN
+        if (flag_slope)
+        {
+            speed = pid_ctrl_speed(speed, speed_value); // ???
+        }
 #endif
         /* A loop to get the speed value,
          * clear the speed value,
