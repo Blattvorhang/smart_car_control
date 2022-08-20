@@ -18,7 +18,7 @@
 #define BUSYAREA_EN 1
 #define THROUGH_BUSYAREA 0
 #define OBSTACLE_ACCELERATION 0
-#define SLOPE_EN 1
+#define SLOPE_EN 0
 
 /* data sent by uart */
 extern volatile float speed;
