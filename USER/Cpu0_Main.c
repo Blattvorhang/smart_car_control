@@ -45,6 +45,7 @@ volatile float speed = 0;
 volatile short angle = 0; // positive for right, negative for left
 volatile short dir_go_around = 0;
 volatile short dir_busyarea = 0;
+volatile short dir_start = 0;
 uint8 uart_buff;
 
 /**
@@ -93,6 +94,11 @@ void uart_receiveVerify(unsigned char data)
                 }
                 switch (Addr)
                 {
+                case 0x00: //start car out of garage
+                    UnionBit16.U16_Buff[0] = BuffData[4];
+                    UnionBit16.U16_Buff[1] = BuffData[5];
+                    dir_start = UnionBit16.I16; //舵机方向
+                    break;
                 case 0x01: //智能车速度,智能车姿态（方向）
                     UnionBit32.U8_Buff[0] = BuffData[0];
                     UnionBit32.U8_Buff[1] = BuffData[1];

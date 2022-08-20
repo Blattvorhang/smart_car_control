@@ -18,10 +18,14 @@
 #define BUSYAREA_EN 1
 #define THROUGH_BUSYAREA 0
 #define OBSTACLE_ACCELERATION 0
+#define SPEED_PD_CTRL 0
 
 /* data sent by uart */
 extern volatile float speed;
 extern volatile short angle;
+#if START
+extern volatile short dir_start; // 1 for right, -1 for left, 0 for none.
+#endif
 #if FREEZONE_EN
 extern volatile short dir_go_around; // 1 for right, -1 for left, 0 for none.
 #endif
@@ -73,6 +77,20 @@ void set_motor_speed(float speed)
     }
 }
 
+int32 pid_ctrl_speed(float expectation, float reality)
+{
+    const float kp = 0.1;
+    const float kd = 0.01;
+    const float ki = 0.0;
+    static float error_last = 0.0;
+    static float error_sum = 0.0;
+    float error = reality - expectation;
+    float output = -(kp * error + kd * (error - error_last) + ki * error_sum);
+    error_last = error;
+    error_sum += error;
+    return (int32)output;
+}
+
 /**
  * run for certain circle with constant velocity.
  *
@@ -100,7 +118,7 @@ void start_car(void)
     const float n_turn = 1.5;
     const uint32 motor_pwm_straight = 2700;
     const uint32 motor_pwm_turn = 1500;
-    const short turn_angle = 40; // positive for left
+    const short turn_angle = -dir_start * 40; // positive for left
 
     /* actions */
     gpio_set(MOTOR_DIR, 0);
